@@ -42,14 +42,14 @@ function onImgLoad() {
 
   // for recalculating the font size.
   const textDiff = text.length > 21 ? text.length - 21 + 5 : 0;
-  const fontSize = 80 - textDiff;
+  const fontSize = 250 - textDiff;
 
-  ctx.font = `700 ${fontSize}px "Quicksand"`;
-  ctx.fillStyle = 'white';
+  ctx.font = `700 ${fontSize}px "Arial"`;
+  ctx.fillStyle = '#374050';
   ctx.textAlign = 'center';
 
   // print name
-  ctx.fillText(fixName(text), (canvas.value.width / 2) + 200, (canvas.value.height / 1.9) - 100);
+  ctx.fillText(fixName(text), (canvas.value.width / 2), (canvas.value.height / 1.9) - 50);
 
   // generate download url
   certImageUrl.value = canvas.value.toDataURL('image/png');
