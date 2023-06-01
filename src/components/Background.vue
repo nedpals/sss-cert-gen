@@ -1,33 +1,8 @@
 <template>
-  <div class="bg">
-    <div class="blobs">
-      <div class="blob-1-fallback"></div>
-      <div class="blob-2-fallback"></div>
-      <Blob
-        id="blob-1"
-        class="blob-1"
-        :image-scale-y="-1"
-        :scale-x="0.6"
-        :scale-y="-0.8"
-        :translate-y="screenHeight"
-        @fill="bottomLeftWaveFill"
-      />
-      <Blob
-        id="blob-2"
-        class="blob-2"
-        :scale-x="-0.6"
-        :scale-y="0.8"
-        :translate-x="screenWidth"
-        @fill="topRightWaveFill"
-      />
-    </div>
-  </div>
+  <div class="bg"></div>
 </template>
 
-<script>
-import Blob from '../components/Blob.vue';
-import topRightWaveImageUrl from '../assets/top_right_wave_bg.png';
-import bottomLeftWaveImgUrl from '../assets/bottom_left_wave.png';
+<script lang="ts">
 
 export default {
   components: {
@@ -50,38 +25,6 @@ export default {
       this.screenWidth = window.innerWidth;
       this.screenHeight = window.innerHeight;
     },
-    bottomLeftWaveFill(bgCanvas, bgCtx, ctx) {
-      const fillImg = new Image();
-      fillImg.src = bottomLeftWaveImgUrl;
-      fillImg.onload = () => {
-        bgCanvas.width = fillImg.width; 
-        bgCanvas.height = fillImg.height;
-        bgCtx.save();
-        bgCtx.scale(1, -1);
-        bgCtx.drawImage(fillImg, 0, -fillImg.height, fillImg.width * 1.25, fillImg.height * 1);
-        bgCtx.restore();
-
-        const pattern = ctx.createPattern(bgCanvas, 'repeat');
-        ctx.fillStyle = pattern;
-        ctx.fill();
-      }
-    },
-    topRightWaveFill(bgCanvas, bgCtx, ctx) {
-      const fillImg = new Image();
-      fillImg.src = topRightWaveImageUrl;
-      fillImg.onload = () => {
-        bgCanvas.width = fillImg.width; 
-        bgCanvas.height = fillImg.height;
-        bgCtx.save();
-        bgCtx.scale(-1, 1);
-        bgCtx.drawImage(fillImg, -fillImg.width, 0, fillImg.width * 1.25, fillImg.height * 1);
-        bgCtx.restore();
-
-        const pattern = ctx.createPattern(bgCanvas, 'repeat');
-        ctx.fillStyle = pattern;
-        ctx.fill();
-      }
-    }
   }
 }
 </script>
@@ -89,9 +32,9 @@ export default {
 <style scoped>
 .bg {
   z-index: -1;
-  top: 0; 
-  left:0; 
-  height: 100vh; 
+  top: 0;
+  left:0;
+  height: 100vh;
   width: 100vw;
 }
 

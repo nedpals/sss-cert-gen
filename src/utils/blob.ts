@@ -1,7 +1,7 @@
 // SAVIOR! https://stackoverflow.com/questions/58864177/animating-a-wobbly-canvas-like-in-discords-login-page
 
 // array of xy coords, closed boolean
-export function bezierSkin(c, bez, closed = true) {
+export function bezierSkin(c: CanvasRenderingContext2D, bez: string | any[], closed = true) {
   const avg = calcAvgs(bez);
   const leng = bez.length;
 
@@ -24,7 +24,7 @@ export function bezierSkin(c, bez, closed = true) {
 }
 
 // create anchor points by averaging the control points
-function calcAvgs(p) {
+function calcAvgs(p: string | any[]) {
   const avg = [];
   const leng = p.length;
   let prev;

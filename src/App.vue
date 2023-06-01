@@ -1,5 +1,5 @@
 <template>
-  <div v-if="$store.state.isPageLoading" class="page-loading-bg">
+  <div v-if="isPageLoading" class="page-loading-bg">
     <LoadingSpinner />
   </div>
   <div class="page-content">
@@ -12,31 +12,27 @@
   <Background style="position: absolute;" />
 </template>
 
-<script>
-import { RouterView } from 'vue-router';
+<script lang="ts" setup>
+import { RouterView, useRoute } from 'vue-router';
 import Background from './components/Background.vue';
 import LoadingSpinner from './components/LoadingSpinner.vue';
+import { onBeforeMount } from 'vue';
+import { __getCurrentUser, isPageLoading } from './store';
 
-export default {
-  components: {
-    RouterView,
-    LoadingSpinner,
-    Background
-  },
-  beforeCreate() {
-    if (this.$route.path != '/confirm') {
-      this.$store.dispatch('getCurrentUser')
-        .then(() => {});
-    }
-  },
-}
+const route = useRoute();
+
+onBeforeMount(() => {
+  if (route.path != '/confirm') {
+    void __getCurrentUser();
+  }
+});
 </script>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400&Quicksand:wght@400;600;700&display=swap');
 @import "normalize.css";
 
-html, 
+html,
 body, #app {
   height: 100%;
   overflow-x: hidden;

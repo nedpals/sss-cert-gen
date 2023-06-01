@@ -2,39 +2,38 @@
   <div class="container">
     <img src="../assets/js_weekends_logo.svg" class="logo">
     <section class="card">
-      <div v-show="isProcessing" class="card-loading-spinner">
+      <div v-show="state.isProcessing" class="card-loading-spinner">
         <LoadingSpinner />
       </div>
       <h2>Claim your certificate</h2>
 
-      <section v-if="isEmailSent" class="section">
-        <p>Authentication link has been sent to:<br/><b>{{ email }}</b><br/><br/> Please close this tab and check your inbox.</p>
+      <section v-if="state.isEmailSent" class="section">
+        <p>Authentication link has been sent to:<br/><b>{{ state.email }}</b><br/><br/> Please close this tab and check your inbox.</p>
 
         <button class="button is-danger" @click="clearForm">Go back</button>
       </section>
 
-      <form v-else-if="!$store.state.isAuthenticated" class="sign-in-form" @submit="login">
+      <form v-else-if="!authState.isAuthenticated" class="sign-in-form" @submit="($e) => void login($e)">
         <label for="email">Enter your e-mail</label>
-        <input 
-          v-model="email"
-          type="email" 
-          name="email" 
-          id="email" 
-          pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" 
+        <input
+          v-model="state.email"
+          type="email"
+          name="email"
+          id="email"
           title="Please enter a valid e-mail address."
-          placeholder="johndoe@example.com" 
-          required 
-          :disabled="isProcessing" />
-        <span v-if="hasMsg" class="input-warning">{{ msg }}</span>
+          placeholder="johndoe@example.com"
+          required
+          :disabled="state.isProcessing" />
+        <span v-if="state.hasMsg" class="input-warning">{{ state.msg }}</span>
         <span v-else class="input-hint">Hint! Use the e-mail address you have used when signing up for the event.</span>
-        <button class="button is-primary" :disabled="isProcessing">Sign in</button>
+        <button class="button is-primary" :disabled="state.isProcessing">Sign in</button>
       </form>
 
       <section v-else class="section">
-        <p>You are currently signed in as <b>{{ $store.state.participantInfo.email }}</b>.</p>
+        <p>You are currently signed in as <b>{{ authState.participantInfo.email }}</b>.</p>
 
         <router-link class="button is-secondary" to="/cert">Claim certificate</router-link>
-        <button class="button is-danger" @click="logout" :disabled="isProcessing">Sign out</button>
+        <button class="button is-danger" @click="logout" :disabled="state.isProcessing">Sign out</button>
       </section>
     </section>
 
@@ -42,78 +41,78 @@
   </div>
 </template>
 
-<script>
+<script lang="ts" setup>
 import { db, auth } from '../firebase';
 import LoadingSpinner from '../components/LoadingSpinner.vue';
+import { collection, getDocs, query, where } from '@firebase/firestore';
+import { sendSignInLinkToEmail } from '@firebase/auth';
+import { authState, logout } from '../store';
+import { reactive } from 'vue';
 
-export default {
-  components: {
-    LoadingSpinner
-  },
-  data() {
-    return {
-      email: null,
-      isProcessing: false,
-      hasMsg: false,
-      isEmailSent: false,
-      msg: ''
-    }
-  },
-  methods: {
-    clearForm() {
-      this.isEmailSent = false;
-      this.email = null;
-      this.msg = '';
-    },
+const state = reactive({
+  email: null as string | null,
+  isProcessing: false,
+  hasMsg: false,
+  isEmailSent: false,
+  msg: ''
+});
 
-    async participantExists() {
-      if (!this.email) return false;
-      const query = db.collection('participants').where('email', '==', this.email);
+function clearForm() {
+  state.isEmailSent = false;
+  state.email = null;
+  state.msg = '';
+}
 
-      try {
-        const doc = await query.get();
+async function participantExists() {
+  if (!state.email) return false;
+  const qry = query(collection(db, 'participants'), where('email', '==', state.email));
 
-        // false if empty, true if not
-        return !doc.empty;
-      } catch (e) {
+  try {
+    const doc = await getDocs(qry);
 
-        console.error(e);
-        return false;
+    console.log(doc);
+
+    // false if empty, true if not
+    return !doc.empty;
+  } catch (e) {
+
+    console.error(e);
+    return false;
+  }
+}
+
+async function login(e: Event) {
+  e.preventDefault();
+
+  if (!state.email) return;
+
+  state.isProcessing = true;
+  state.hasMsg = false;
+  const participantInDB = await participantExists();
+
+  if (participantInDB) {
+    try {
+      await sendSignInLinkToEmail(auth, state.email, {
+        url: `${window.location.origin}/confirm`,
+        handleCodeInApp: true
+      });
+
+      // separate view
+      state.isEmailSent = true;
+      window.localStorage.setItem('emailForSignIn', state.email);
+    } catch(e) {
+      console.error(e);
+
+      if (e instanceof Error) {
+        state.msg = e.message;
       }
-    },
-
-    async login(e) {
-      e.preventDefault();
-
-      this.isProcessing = true;
-      this.hasMsg = false;
-      const participantInDB = await this.participantExists();
-
-      if (participantInDB) {
-        try {
-          await auth.sendSignInLinkToEmail(this.email, {
-            url: `${window.location.origin}/confirm`,
-            handleCodeInApp: true
-          });
-
-          // separate view
-          this.isEmailSent = true;
-          window.localStorage.setItem('emailForSignIn', this.email);
-        } catch(e) {
-          console.error(e);
-        } finally {
-          this.isProcessing = false;
-        }
-      } else {
-        this.isProcessing = false;
-        this.hasMsg = true;
-        this.msg = `E-mail ${this.email} was not found in our records! Please double check your e-mail.`;
-      }
-    },
-
-    async logout() {
-      await this.$store.dispatch('logout');
+    } finally {
+      state.isProcessing = false;
     }
+  } else {
+    state.isProcessing = false;
+    state.hasMsg = true;
+    state.msg = `E-mail ${state.email} was not found in our records! Please double check your e-mail.`;
   }
 }
 </script>
@@ -247,7 +246,7 @@ export default {
   }
 
   .presenter-logos {
-    width: 25%; 
+    width: 25%;
   }
 }
 </style>

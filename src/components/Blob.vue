@@ -1,130 +1,127 @@
 <template>
-  <canvas :id="id"></canvas>
+  <canvas ref="canvas"></canvas>
 </template>
 
-<script>
+<script lang="ts" setup>
+import { onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import { bezierSkin } from '../utils/blob';
 
 const HALF_PI = Math.PI / 2;
 const bumpRadius = 100;
 const halfBumpRadius = bumpRadius / 2;
 
-export default {
-  emits: ['fill'],
-  props: {
-    id: {
-      type: String,
-      default: 'blob'
-    },
-    scaleX: {
-      type: Number,
-      default: 1
-    },
-    scaleY: {
-      type: Number,
-      default: 1
-    },
-    translateX: {
-      type: Number,
-      default: 0
-    },
-    translateY: {
-      type: Number,
-      default: 0
-    },
-    radius: {
-      type: Number,
-      default: 500
-    },
-    segments: {
-      type: Number,
-      default: 8
-    }
+const emit = defineEmits(['fill']);
+const props = defineProps({
+  scaleX: {
+    type: Number,
+    default: 1
   },
-  created() {
-    window.addEventListener('resize', this.paint);
+  scaleY: {
+    type: Number,
+    default: 1
   },
-  unmounted() {
-    window.removeEventListener('resize', this.paint);
+  translateX: {
+    type: Number,
+    default: 0
   },
-  mounted() {
-    this.canvas = document.getElementById(this.id);
-    this.c = this.canvas.getContext("2d");
-    this.paint();
-    this.loop();
+  translateY: {
+    type: Number,
+    default: 0
   },
-  data() {
-    return {
-      hasFill: false,
-
-      wobbleIncrement: 0,
-      anchors: [],
-      radii: [],
-      thetaOff: [],
-      
-      theta: 0,
-      thetaRamp: 0,
-      thetaRampDest: 12,
-      rampDamp: 50,
-    };
+  radius: {
+    type: Number,
+    default: 500
   },
-  computed: {
-    step() {
-      return HALF_PI / this.segments;
-    }
-  },
-  methods: {
-    paint() {
-      this.canvas.width = window.innerWidth;
-      this.canvas.height = window.innerHeight;
-      
-
-      for (let i = 0; i < this.segments + 2; i++) {
-        this.anchors.push(0, 0);
-        this.radii.push(Math.random() * bumpRadius - halfBumpRadius);
-        this.thetaOff.push(Math.random() * 2 * Math.PI);
-      }
-
-      // make background fill
-      const bgCanvas = document.createElement('canvas');
-      const bgCtx = bgCanvas.getContext('2d');
-      this.$emit('fill', bgCanvas, bgCtx, this.c);
-      this.hasFill = true;
-    },
-    loop() {
-      this.c.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      this.update();
-      window.requestAnimationFrame(this.loop);
-    },
-    update() {
-      this.thetaRamp += (this.thetaRampDest - this.thetaRamp) / this.rampDamp;
-      this.theta += 0.03;
-
-      this.anchors = [0, this.radius];
-      for (let i = 0; i <= this.segments + 2; i++) {
-        const sine = Math.sin(this.thetaOff[i] + this.theta + this.thetaRamp);
-        const rad = this.radius + this.radii[i] * sine;
-        const x = rad * Math.sin(this.step * i);
-        const y = rad * Math.cos(this.step * i);
-        this.anchors.push(x, y);
-      }
-
-      this.c.save();
-      this.c.translate(this.translateX, this.translateY);
-      this.c.scale(this.scaleX, this.scaleY);
-      // this.c.scale(1, 1);
-      this.c.beginPath();
-      this.c.moveTo(0, 0);
-      bezierSkin(this.c, this.anchors, false);
-      
-      if (!this.hasFill) {
-        this.c.fillStyle = '#282a36';
-      }
-
-      this.c.lineTo(0, 0);
-      this.c.fill();
-      this.c.restore();
-    }
+  segments: {
+    type: Number,
+    default: 8
   }
+});
+
+const step = HALF_PI / props.segments;
+const canvas = ref<HTMLCanvasElement | null>(null);
+const c = canvas.value?.getContext('2d');
+const state = reactive({
+  hasFill: false,
+
+  wobbleIncrement: 0,
+  anchors: [] as number[],
+  radii: [] as number[],
+  thetaOff: [] as number[],
+
+  theta: 0,
+  thetaRamp: 0,
+  thetaRampDest: 12,
+  rampDamp: 50,
+});
+
+function paint() {
+  if (canvas.value) {
+    canvas.value.width = window.innerWidth;
+    canvas.value.height = window.innerHeight;
+  }
+
+  for (let i = 0; i < props.segments + 2; i++) {
+    state.anchors.push(0, 0);
+    state.radii.push(Math.random() * bumpRadius - halfBumpRadius);
+    state.thetaOff.push(Math.random() * 2 * Math.PI);
+  }
+
+  // make background fill
+  const bgCanvas = document.createElement('canvas');
+  const bgCtx = bgCanvas.getContext('2d');
+  emit('fill', bgCanvas, bgCtx, c);
+  state.hasFill = true;
 }
+
+function loop() {
+  if (!c || !canvas.value) return;
+
+  c.clearRect(0, 0, canvas.value.width, canvas.value.height);
+  update();
+  window.requestAnimationFrame(loop);
+}
+
+function update() {
+  if (!c || !canvas.value) return;
+
+  state.thetaRamp += (state.thetaRampDest - state.thetaRamp) / state.rampDamp;
+  state.theta += 0.03;
+
+  state.anchors = [0, props.radius];
+  for (let i = 0; i <= props.segments + 2; i++) {
+    const sine = Math.sin(state.thetaOff[i] + state.theta + state.thetaRamp);
+    const rad = props.radius + state.radii[i] * sine;
+    const x = rad * Math.sin(step * i);
+    const y = rad * Math.cos(step * i);
+    state.anchors.push(x, y);
+  }
+
+  c.save();
+  c.translate(props.translateX, props.translateY);
+  c.scale(props.scaleX, props.scaleY);
+  // c.scale(1, 1);
+  c.beginPath();
+  c.moveTo(0, 0);
+  bezierSkin(c, state.anchors, false);
+
+  if (!state.hasFill) {
+    c.fillStyle = '#282a36';
+  }
+
+  c.lineTo(0, 0);
+  c.fill();
+  c.restore();
+}
+
+onMounted(() => {
+  window.addEventListener('resize', paint);
+
+  paint();
+  loop();
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', paint);
+})
 </script>

@@ -2,12 +2,6 @@
   <div class="loading-spinner"></div>
 </template>
 
-<script>
-export default {
-
-}
-</script>
-
 <style scoped>
 @keyframes rotate-forever {
   0% {

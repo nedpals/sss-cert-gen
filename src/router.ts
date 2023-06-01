@@ -1,25 +1,24 @@
-import { store } from './store';
-import { version } from '../package.json';
-
 // router
-import { createRouter, createWebHistory } from 'vue-router';
+import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router';
 import { analytics } from './firebase';
-const routes = [
-  { 
-    path: '/', 
+import { logEvent } from 'firebase/analytics';
+import { __getCurrentUser } from './store';
+const routes: RouteRecordRaw[] = [
+  {
+    path: '/',
     component: () => import('./pages/Home.vue'),
     meta: {
       transition: 'fade',
       pageTitle: 'Home Page'
     }
   },
-  { 
-    path: '/confirm', 
+  {
+    path: '/confirm',
     component: () => import('./pages/ConfirmAuth.vue'),
     meta: {
       pageTitle: 'Auth Confirmation'
     },
-    beforeEnter: (to, from, next) => {
+    beforeEnter: (to, _, next) => {
       if (to.path == '/confirm' && !to.query.hasOwnProperty('apiKey') && !to.query.hasOwnProperty('oobCode')) {
         next('/');
       } else {
@@ -43,19 +42,13 @@ export const router = createRouter({
   routes
 });
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to, _, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-  if (requiresAuth && !(await store.dispatch('getCurrentUser'))) {
+  if (requiresAuth && !(await __getCurrentUser())) {
     next('/');
   } else {
     if (import.meta.env.PROD) {
-      analytics.setCurrentScreen(to.meta.pageTitle);
-      analytics.logEvent("page_view");
-      analytics.logEvent("screen_view", {
-        app_name: 'web',
-        screen_name: to.meta.pageTitle,
-        app_version: version
-      });
+      logEvent(analytics, "page_view");
     }
     next();
   }

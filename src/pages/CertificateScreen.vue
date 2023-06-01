@@ -1,5 +1,5 @@
 <template>
-  <section class="cert-page" v-show="!$store.state.isPageLoading">
+  <section class="cert-page" v-show="!isPageLoading">
     <h2 class="heading">Here's your certificate!</h2>
     <transition name="slide-card">
       <div
@@ -17,114 +17,107 @@
   </section>
 </template>
 
-<script>
-import certImageUrl from '../assets/cert.png';
-import namecase from 'namecase/namecase';
+<script lang="ts" setup>
+import { onMounted, onUnmounted, ref } from 'vue';
+import certImageTemplateUrl from '../assets/cert.png';
+import { nameCase as namecase } from '@foundernest/namecase';
+import { authState, isPageLoading, setAsClaimed } from '../store';
+import { computed } from '@vue/reactivity';
 
-export default {
-  mounted() {
-    this.img.src = certImageUrl;
-    this.img.addEventListener('load', this.onImgLoad, false);
-    this.$store.dispatch('setAsClaimed')
-      .then(() => {});
-  },
-  unmounted() {
-    this.img.removeEventListener('load', this.onImgLoad);
-  },
-  data() {
-    return {
-      imageHasLoaded: false,
-      img: new Image(),
-      canvas: document.createElement('canvas'),
-      certImageUrl: ''
+const img = ref(new Image());
+const imageHasLoaded = ref(false);
+const canvas = ref(document.createElement('canvas'));
+const certImageUrl = ref('');
+const certificateImgCss = computed(() => `background-image: url(${certImageUrl.value});`);
+
+function onImgLoad() {
+  const ctx = canvas.value.getContext('2d');
+  if (!ctx) return;
+
+  canvas.value.height = img.value.height;
+  canvas.value.width = img.value.width;
+
+  ctx.drawImage(img.value, 0, 0, img.value.width, img.value.height);
+  const text = authState.participantInfo.name!;
+
+  // for recalculating the font size.
+  const textDiff = text.length > 21 ? text.length - 21 + 5 : 0;
+  const fontSize = 80 - textDiff;
+
+  ctx.font = `700 ${fontSize}px "Quicksand"`;
+  ctx.fillStyle = 'white';
+  ctx.textAlign = 'center';
+
+  // print name
+  ctx.fillText(fixName(text), (canvas.value.width / 2) + 200, (canvas.value.height / 1.9) - 100);
+
+  // generate download url
+  certImageUrl.value = canvas.value.toDataURL('image/png');
+
+  setTimeout(() => {
+    imageHasLoaded.value = true;
+  }, 200);
+}
+
+function downloadCertImage() {
+  const link = document.createElement('a');
+  const name = authState.participantInfo.name!;
+  link.download = `Certificate - ${name}.png`;
+  link.href = certImageUrl.value;
+  link.click();
+}
+
+function fixName(name: string) {
+  // FIXME: better algo for this ;--;
+  let finalName = name;
+  try {
+    // search for apostrophes
+    let nameArr = finalName.split(',');
+    const deleted = nameArr.splice(0, 1);
+    if (deleted.length == 0) {
+      throw new Error('Last name not found!');
     }
-  },
-  computed: {
-    certificateImgSizeCss() {
-      return `width: ${this.img.width * 0.25}px; height: ${(this.img.height) + 150}px;`;
-    },
-    certificateImgCss() {
-      return `background-image: url(${this.certImageUrl});`;
-    }
-  },
-  methods: {
-    onImgLoad() {
-      const ctx = this.canvas.getContext('2d');
-      this.canvas.height = this.img.height; 
-      this.canvas.width = this.img.width;
+    nameArr = nameArr.concat(deleted[0]).map(n => n.trimLeft()).join(' ').split(' ');
 
-      ctx.drawImage(this.img, 0, 0, this.img.width, this.img.height);
-      const text = this.$store.state.participantInfo.name;
-
-      // for recalculating the font size.
-      const textDiff = text.length > 21 ? text.length - 21 + 5 : 0;
-      const fontSize = 80 - textDiff;
-
-      ctx.font = `700 ${fontSize}px "Quicksand"`;
-      ctx.fillStyle = 'white';
-      ctx.textAlign = 'center';
-      
-      // print name
-      ctx.fillText(this.fixName(text), (this.canvas.width / 2) + 200, (this.canvas.height / 1.9) - 100);
-
-      // generate download url
-      this.certImageUrl = this.canvas.toDataURL('image/png');
-      
-      setTimeout(() => {
-        this.imageHasLoaded = true;
-      }, 200);
-    },
-    downloadCertImage() {
-      const link = document.createElement('a');
-      link.download = 'JSWeekends_Certificate.png';
-      link.href = this.certImageUrl;
-      link.click();
-    },
-    /**
-     * @param {string} name
-     */
-    fixName(name) {
-      // FIXME: better algo for this ;--;
-      let finalName = name;
-      try {
-        // search for apostrophes
-        let nameArr = finalName.split(',');
-        const deleted = nameArr.splice(0, 1);
-        if (deleted.length == 0) {
-          throw new Error('Last name not found!');
+    // fix suffixes
+    const suffixRegex = /^[JSjs][rR]$/g;
+    const initialsRegex = /^[A-Za-z]{1}.$/g;
+    if (suffixRegex.test(nameArr[nameArr.length - 1])) {
+      nameArr[nameArr.length - 1] += '.';
+    } else if (initialsRegex.test(nameArr[nameArr.length - 1])) {
+      const deleted2 = nameArr.splice(0, 1);
+      if (deleted2.length == 0) {
+        throw new Error('Last name not found!');
+      }
+      nameArr = nameArr.concat(deleted2[0]);
+    } else {
+      const initialsRegex2 = /^[A-Za-z]{1}$/g;
+      for (let i = 0; i < nameArr.length; i++) {
+        if (initialsRegex2.test(nameArr[i])) {
+          nameArr[i] += '.';
         }
-        nameArr = nameArr.concat(deleted[0]).map(n => n.trimLeft()).join(' ').split(' ');
-        
-        // fix suffixes
-        const suffixRegex = /^[JSjs][rR]$/g;
-        const initialsRegex = /^[A-Za-z]{1}.$/g;
-        if (suffixRegex.test(nameArr[nameArr.length - 1])) {
-          nameArr[nameArr.length - 1] += '.';
-        } else if (initialsRegex.test(nameArr[nameArr.length - 1])) {
-          const deleted2 = nameArr.splice(0, 1);
-          if (deleted2.length == 0) {
-            throw new Error('Last name not found!');
-          }
-          nameArr = nameArr.concat(deleted2[0]);
-        } else {
-          const initialsRegex2 = /^[A-Za-z]{1}$/g;
-          for (let i = 0; i < nameArr.length; i++) {
-            if (initialsRegex2.test(nameArr[i])) {
-              nameArr[i] += '.';
-            }
-          }
-        }
-        finalName = nameArr.join(' ');
-        return finalName.endsWith('De Vera') ? finalName : namecase(finalName);
-      } catch(e) {
-        // this catch block should not do anything
-        // but print harmless messages
-        console.error(e);  
-        return namecase(finalName);
       }
     }
+    finalName = nameArr.join(' ');
+    return finalName.endsWith('De Vera') ? finalName : namecase(finalName);
+  } catch(e) {
+    // this catch block should not do anything
+    // but print harmless messages
+    console.error(e);
+    return namecase(finalName);
   }
 }
+
+onMounted(() => {
+  img.value.src = certImageTemplateUrl;
+  img.value.addEventListener('load', onImgLoad, false);
+
+  void setAsClaimed();
+});
+
+onUnmounted(() => {
+  img.value.removeEventListener('load', onImgLoad);
+});
 </script>
 
 <style scoped>
@@ -178,7 +171,7 @@ export default {
   transform-origin: top left;
   margin: 0;
   border: 4px solid #fff;
-  background-size: cover; 
+  background-size: cover;
   background-repeat: no-repeat;
   box-shadow: 0 1.5px 10px rgba(0, 0, 0, 0.6), 0 1.5px 12px rgba(0, 0, 0, 0.6);
   position: relative;
