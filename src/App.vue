@@ -40,7 +40,7 @@ body, #app {
 
 body {
   color: #f8f8f2;
-  background: #282a36;
+  background: #fff;
 }
 
 #app {
@@ -84,38 +84,38 @@ a.button {
 }
 
 .button.is-primary {
-  background-color: #ec64b1;
-  background-image: linear-gradient(#ec64b1, #ce4191);
+  background-color: var(--primary-color);
+  background-image: linear-gradient(var(--primary-color), var(--primary-color-hover));
   color: #fff;
-  border: 1px solid #cc4692;
+  border: 1px solid var(--primary-color-hover);
 }
 
 .button.is-secondary {
   color: #fff;
-  background-color: #47ee71;
-  background-image: linear-gradient(#40df67, #23bb49);
+  background-color: var(--secondary-color);
+  background-image: linear-gradient(var(--secondary-color), var(--secondary-color-hover));
 }
 
 .button.is-secondary:hover,
 .button.is-secondary:focus {
-  background: #23bb49;
+  background: var(--secondary-color-hover);
 }
 
 .button.is-primary:hover,
 .button.is-primary:focus {
-  background: #cc4692;
+  background: var(--primary-color-hover);
 }
 
 .button.is-danger {
-  background-color: #ff5555;
-  background-image: linear-gradient(#ff5555, #c72d2d);
+  background-color: var(--danger-color);
+  background-image: linear-gradient(var(--danger-color), var(--danger-color-hover));
   color: #fff;
-  border: 1px solid #b41e1e;
+  border: 1px solid var(--danger-color-hover);
 }
 
 .button.is-danger:hover,
 .button.is-danger:focus {
-  background: #b41e1e;
+  background: var(--danger-color-hover);
 }
 
 /* Fade Transition */

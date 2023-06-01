@@ -1,5 +1,9 @@
 <template>
-  <div class="bg"></div>
+  <div class="bg">
+    <div class="bg-top"></div>
+    <div class="bg-left"></div>
+    <div class="bg-right"></div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -36,64 +40,41 @@ export default {
   left:0;
   height: 100vh;
   width: 100vw;
-}
-
-.blobs {
   position: relative;
-  height: 100%;
 }
 
-.blob-1,
-.blob-2,
-.blob-1-fallback,
-.blob-2-fallback {
+.bg-top {
   position: absolute;
-}
-
-.blob-1,
-.blob-2 {
   top: 0;
-  display: none;
+  background-image: url(../assets/bg-top.png);
+  height: 100%;
+  width: 100%;
+  background-repeat: no-repeat;
+  background-position: top center;
 }
 
-.blob-1,
-.blob-1-fallback {
-  left: 0;
+.bg-left,
+.bg-right {
+  width: 50vw;
+  height: 50vh;
+  background-repeat: no-repeat;
 }
 
-.blob-2,
-.blob-2-fallback {
-  right: 0;
-}
-
-.blob-1-fallback,
-.blob-2-fallback {
-  height: 100vh;
-  width: 100vw;
-}
-
-.blob-1-fallback {
+.bg-left {
+  position: absolute;
   bottom: 0;
-  background: url(../assets/bottom_left_wave_fallback.png) no-repeat;
+  left: 0;
+  background-image: url(../assets/bg-left.png);
   background-position: bottom left;
-
+  background-size: 50%;
 }
 
-.blob-2-fallback {
-  top: 0;
-  background: url(../assets/top_right_wave_fallback.png) no-repeat;
-  background-position: top right;
-}
-
-@media screen and (min-width: 1280px) {
-  .blob-1-fallback,
-  .blob-2-fallback {
-    display: none;
-  }
-
-  .blob-1,
-  .blob-2 {
-    display: block;
-  }
+.bg-right {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background-image: url(../assets/bg-right.png);
+  background-position: bottom right;
+  background-size: contain;
 }
 </style>

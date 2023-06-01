@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <img src="../assets/js_weekends_logo.svg" class="logo">
+    <img src="../assets/logo.png" class="logo">
     <section class="card">
       <div v-show="state.isProcessing" class="card-loading-spinner">
         <LoadingSpinner />
@@ -127,8 +127,8 @@ async function login(e: Event) {
 }
 
 .logo {
-  width: 20rem;
-  filter: drop-shadow( 3px 3px 2px rgba(0, 0, 0, 1));
+  width: 10rem;
+  margin-bottom: 3rem;
 }
 
 .card {
@@ -136,10 +136,12 @@ async function login(e: Event) {
   background: #fff;
   width: 75%;
   color: #000;
+  border: 1px solid rgba(0, 0, 0, 0.184);
   border-radius: 10px;
   padding: 2rem 1.8rem;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
 }
 
 .card .card-loading-spinner {
@@ -200,7 +202,7 @@ async function login(e: Event) {
 }
 
 .sign-in-form .input-warning {
-  color: #ff5555;
+  color: var(--danger-color);
 }
 
 .sign-in-form .input-hint {
@@ -228,7 +230,7 @@ async function login(e: Event) {
 
 @media screen and (min-width: 1024px) {
   .logo {
-    width: 30rem;
+    width: 20rem;
   }
 
   .card {

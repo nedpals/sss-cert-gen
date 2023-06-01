@@ -10,8 +10,8 @@
     <div class="cert-padding"></div>
     <transition name="fade">
       <div class="actions">
-        <button v-show="imageHasLoaded" class="button is-primary" @click="downloadCertImage">Download Image</button>
-        <router-link to="/" class="button is-secondary">Go back</router-link>
+        <button v-show="imageHasLoaded" class="button is-secondary" @click="downloadCertImage">Download Image</button>
+        <router-link to="/" class="button is-primary">Go back</router-link>
       </div>
     </transition>
   </section>
@@ -128,8 +128,10 @@ onUnmounted(() => {
 .heading {
   font-family: "Google Sans", Arial, Helvetica, sans-serif;
   font-weight: 400;
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
   text-align: center;
+  color: #374050;
+  font-size: 2.5rem;
 }
 
 @keyframes slide-card {
@@ -177,7 +179,7 @@ onUnmounted(() => {
   border: 4px solid #fff;
   background-size: cover;
   background-repeat: no-repeat;
-  box-shadow: 0 1.5px 10px rgba(0, 0, 0, 0.6), 0 1.5px 12px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 1.5px 10px rgba(0, 0, 0, 0.3), 0 1.5px 12px rgba(0, 0, 0, 0.3);
   position: relative;
 }
 
@@ -199,7 +201,7 @@ onUnmounted(() => {
 
 @media screen and (min-width: 1024px) {
   .heading {
-    font-size: 2.5rem;
+    font-size: 4rem;
   }
 }
 
@@ -212,7 +214,7 @@ onUnmounted(() => {
   }
 
   .heading {
-    font-size: 3.3rem;
+    font-size: 4rem;
   }
 
   .slide-card-enter-active {
