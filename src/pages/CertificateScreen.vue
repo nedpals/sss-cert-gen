@@ -23,6 +23,7 @@ import certImageTemplateUrl from '../assets/cert.png';
 import { nameCase as namecase } from '@foundernest/namecase';
 import { authState, isPageLoading, setAsClaimed } from '../store';
 import { computed } from '@vue/reactivity';
+import { jsPDF } from 'jspdf';
 
 const img = ref(new Image());
 const imageHasLoaded = ref(false);
@@ -44,7 +45,7 @@ function onImgLoad() {
   const textDiff = text.length > 21 ? text.length - 21 + 5 : 0;
   const fontSize = 250 - textDiff;
 
-  ctx.font = `700 ${fontSize}px "Arial"`;
+  ctx.font = `700 ${fontSize}px "Google Sans"`;
   ctx.fillStyle = '#374050';
   ctx.textAlign = 'center';
 
@@ -60,11 +61,14 @@ function onImgLoad() {
 }
 
 function downloadCertImage() {
-  const link = document.createElement('a');
+  const doc = new jsPDF('l', 'mm', 'a4');
   const name = authState.participantInfo.name!;
-  link.download = `Certificate - ${name}.png`;
-  link.href = certImageUrl.value;
-  link.click();
+  const filename = `LAWIG Certificate - ${name}.pdf`;
+  const width = doc.internal.pageSize.getWidth();
+  const height = doc.internal.pageSize.getHeight();
+
+  doc.addImage(canvas.value, 'PNG', 0, 0, width, height, undefined, 'MEDIUM');
+  doc.save(filename);
 }
 
 function fixName(name: string) {
@@ -122,7 +126,7 @@ onUnmounted(() => {
 
 <style scoped>
 .heading {
-  font-family: "Syncopate", Arial, Helvetica, sans-serif;
+  font-family: "Google Sans", Arial, Helvetica, sans-serif;
   font-weight: 400;
   margin-bottom: 2rem;
   text-align: center;

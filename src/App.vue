@@ -29,7 +29,7 @@ onBeforeMount(() => {
 </script>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400&Quicksand:wght@400;600;700&display=swap');
+@import url('https://cdn.jsdelivr.net/gh/mortezaom/google-sans-cdn@master/fonts.css');
 @import "normalize.css";
 
 html,
@@ -44,7 +44,7 @@ body {
 }
 
 #app {
-  font-family: "Quicksand", Helvetica, Arial, sans-serif;
+  font-family: "Google Sans", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   position: relative;
