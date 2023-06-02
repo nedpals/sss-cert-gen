@@ -7,13 +7,23 @@
       </div>
       <h2>Claim your certificate</h2>
 
-      <section v-if="state.isEmailSent" class="section">
-        <p>Authentication link has been sent to:<br/><b>{{ state.email }}</b><br/><br/> Please close this tab and check your inbox.</p>
-
+      <form v-if="state.isEmailSent" class="section" @submit="($e) => void login($e)">
+        <label for="got_name">As a final step, enter the first name you have input into the registration form.</label>
+        <input
+          v-model="state.gotName"
+          type="text"
+          name="got_name"
+          id="got_name"
+          title="First name"
+          required
+          :disabled="state.isProcessing" />
+        <span v-if="state.hasMsg" class="input-warning">{{ state.msg }}</span>
+        <span v-else class="input-hint">The input should be case-sensitive</span>
+        <button type="submit" class="button is-primary">Submit</button>
         <button class="button is-danger" @click="clearForm">Go back</button>
-      </section>
+      </form>
 
-      <form v-else-if="!authState.isAuthenticated" class="sign-in-form" @submit="($e) => void login($e)">
+      <form v-else-if="!authState.isAuthenticated" class="sign-in-form" @submit="($e) => void verify($e)">
         <label for="email">Enter your e-mail</label>
         <input
           v-model="state.email"
@@ -42,24 +52,26 @@
 </template>
 
 <script lang="ts" setup>
-import { db, auth } from '../firebase';
+import { db } from '../firebase';
 import LoadingSpinner from '../components/LoadingSpinner.vue';
 import { collection, getDocs, query, where } from '@firebase/firestore';
-import { sendSignInLinkToEmail } from '@firebase/auth';
 import { authState, logout } from '../store';
 import { reactive } from 'vue';
+import { __getCurrentUser } from '../store';
 
 const state = reactive({
   email: null as string | null,
   isProcessing: false,
   hasMsg: false,
   isEmailSent: false,
+  gotName: '',
   msg: ''
 });
 
 function clearForm() {
   state.isEmailSent = false;
   state.email = null;
+  state.gotName = '';
   state.msg = '';
 }
 
@@ -69,13 +81,9 @@ async function participantExists() {
 
   try {
     const doc = await getDocs(qry);
-
-    console.log(doc);
-
     // false if empty, true if not
     return !doc.empty;
   } catch (e) {
-
     console.error(e);
     return false;
   }
@@ -84,25 +92,49 @@ async function participantExists() {
 async function login(e: Event) {
   e.preventDefault();
 
+  if (!state.isEmailSent || !state.gotName || !state.email) return;
+
+  state.isProcessing = true;
+  state.hasMsg = false;
+
+  try {
+    const qry = query(collection(db, 'participants'), where('email', '==', state.email));
+    const docs = await getDocs(qry);
+    const firstDoc = docs.docs[0];
+
+    const name = firstDoc.get('name') as string;
+    if (!name.startsWith(state.gotName)) {
+      throw new Error('First name not matched with our records.');
+    }
+
+    // separate view
+    await __getCurrentUser(state.email);
+    clearForm();
+  } catch(e) {
+    console.error(e);
+
+    if (e instanceof Error) {
+      state.msg = e.message;
+    }
+  } finally {
+    state.isProcessing = false;
+  }
+}
+
+async function verify(e: Event) {
+  e.preventDefault();
+
   if (!state.email) return;
 
   state.isProcessing = true;
   state.hasMsg = false;
-  const participantInDB = await participantExists();
 
-  if (participantInDB) {
+  if (await participantExists()) {
     try {
-      await sendSignInLinkToEmail(auth, state.email, {
-        url: `${window.location.origin}/confirm`,
-        handleCodeInApp: true
-      });
-
       // separate view
       state.isEmailSent = true;
-      window.localStorage.setItem('emailForSignIn', state.email);
     } catch(e) {
       console.error(e);
-
       if (e instanceof Error) {
         state.msg = e.message;
       }
@@ -180,32 +212,33 @@ async function login(e: Event) {
   justify-content: flex-start;
 }
 
-.sign-in-form label[for="email"] {
+label[for="email"],
+label[for="got_name"] {
   text-align: left;
   margin-bottom: 0.5rem;
   color: rgb(50, 50, 50);
 }
 
-.sign-in-form input {
+input {
   padding: 0.8rem 1rem;
   border-radius: 4px;
   border: rgba(0, 0, 0, 0.5) 1px solid;
   margin-bottom: 0.5rem;
 }
 
-.sign-in-form .input-warning,
-.sign-in-form .input-hint {
+.input-warning,
+.input-hint {
   margin-bottom: 1rem;
   text-align: left;
   font-size: 0.9rem;
   font-weight: 600;
 }
 
-.sign-in-form .input-warning {
+.input-warning {
   color: var(--danger-color);
 }
 
-.sign-in-form .input-hint {
+.input-hint {
   color: rgb(117, 117, 117);
 }
 

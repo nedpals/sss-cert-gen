@@ -1,8 +1,7 @@
 import { reactive, ref } from 'vue';
-import { auth, db, getCurrentUser } from './firebase';
+import { db } from './firebase';
 
 // state management
-import { signOut } from 'firebase/auth';
 import { collection, doc, getDocs, limit, query, updateDoc, where } from 'firebase/firestore';
 
 export const isPageLoading = ref(false);
@@ -32,8 +31,6 @@ export async function logout() {
 
   togglePageLoading(true);
 
-  await signOut(auth);
-
   authState.isAuthenticated = false;
   authState.participantInfo = {
     email: null,
@@ -54,31 +51,25 @@ export async function setAsClaimed() {
   await updateDoc(docRef, { hasClaimed: true });
 }
 
-export async function __getCurrentUser() {
+export async function __getCurrentUser(email: string) {
   try {
     if (authState.isAuthenticated) {
       togglePageLoading(false);
       return true;
     }
 
-    const user = await getCurrentUser();
-    if (user && user.emailVerified) {
-      // get user details
-      const qry = query(collection(db, 'participants'), where('email', '==', user.email), limit(1));
-      const querySnapshot = await getDocs(qry);
-      if (!querySnapshot.empty) {
-        const doc = querySnapshot.docs[0];
+    const qry = query(collection(db, 'participants'), where('email', '==', email), limit(1));
+    const querySnapshot = await getDocs(qry);
+    if (!querySnapshot.empty) {
+      const doc = querySnapshot.docs[0];
 
-        authState.isAuthenticated = true;
-        authState.participantInfo = {
-          docId: doc.id ?? null,
-          email: user.email,
-          name: doc.get('name'),
-          hasClaimed: doc.get('hasClaimed') ?? false
-        }
+      authState.isAuthenticated = true;
+      authState.participantInfo = {
+        docId: doc.id ?? null,
+        email: doc.get('email'),
+        name: doc.get('name'),
+        hasClaimed: doc.get('hasClaimed') ?? false
       }
-    } else {
-      throw Error('Not logged in!');
     }
   } catch (e) {
     authState.isAuthenticated = false;

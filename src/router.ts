@@ -2,7 +2,7 @@
 import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router';
 import { analytics } from './firebase';
 import { logEvent } from 'firebase/analytics';
-import { __getCurrentUser } from './store';
+import { __getCurrentUser, authState } from './store';
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
@@ -10,20 +10,6 @@ const routes: RouteRecordRaw[] = [
     meta: {
       transition: 'fade',
       pageTitle: 'Home Page'
-    }
-  },
-  {
-    path: '/confirm',
-    component: () => import('./pages/ConfirmAuth.vue'),
-    meta: {
-      pageTitle: 'Auth Confirmation'
-    },
-    beforeEnter: (to, _, next) => {
-      if (to.path == '/confirm' && !to.query.hasOwnProperty('apiKey') && !to.query.hasOwnProperty('oobCode')) {
-        next('/');
-      } else {
-        next();
-      }
     }
   },
   {
@@ -44,7 +30,7 @@ export const router = createRouter({
 
 router.beforeEach(async (to, _, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-  if (requiresAuth && !(await __getCurrentUser())) {
+  if (requiresAuth && !authState.isAuthenticated) {
     next('/');
   } else {
     if (import.meta.env.PROD) {
