@@ -11,6 +11,7 @@
     <transition name="fade">
       <div class="actions">
         <button v-show="imageHasLoaded" class="button is-secondary" @click="downloadCertImage">Download Image</button>
+        <button v-show="imageHasLoaded" class="button is-secondary" @click="downloadCertPDF">Download PDF</button>
         <router-link to="/" class="button is-primary">Go back</router-link>
       </div>
     </transition>
@@ -61,6 +62,13 @@ function onImgLoad() {
 }
 
 function downloadCertImage() {
+  const link = document.createElement('a');
+  link.download = `LAWIG Certificate - ${name}.png`;
+  link.href = certImageUrl.value;
+  link.click();
+}
+
+function downloadCertPDF() {
   const doc = new jsPDF('l', 'mm', 'a4');
   const name = authState.participantInfo.name!;
   const filename = `LAWIG Certificate - ${name}.pdf`;
@@ -185,6 +193,7 @@ onUnmounted(() => {
 
 .actions {
   display: flex;
+  flex-direction: column;
 }
 
 .actions .button {
@@ -193,10 +202,7 @@ onUnmounted(() => {
   text-align: center;
   align-items: center;
   justify-content: center;
-}
-
-.actions .button:not(:last-child) {
-  margin-right: 0.5rem;
+  margin: 0.25rem;
 }
 
 @media screen and (min-width: 1024px) {
