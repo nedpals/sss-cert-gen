@@ -53,6 +53,13 @@ function onImgLoad() {
   // print name
   ctx.fillText(fixName(text), (canvas.value.width / 2), (canvas.value.height / 1.9) - 50);
 
+  if (authState.participantInfo.docId) {
+    // print identifier
+    ctx.font = `400 50px "Google Sans"`;
+    ctx.textAlign = 'left';
+    ctx.fillText(`LAWIG-${authState.participantInfo.docId.toUpperCase()}`, 200, 200)
+  }
+
   // generate download url
   certImageUrl.value = canvas.value.toDataURL('image/png');
 
