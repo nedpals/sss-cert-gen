@@ -8,7 +8,7 @@
       <h2>Claim your certificate</h2>
 
       <form v-if="state.isEmailSent" class="section" @submit="($e) => void login($e)">
-        <label for="got_name">As a final step, enter the first name you have input into the registration form.</label>
+        <label for="got_name">As a final step, please enter the first name you provided in the registration form.</label>
         <input
           v-model="state.gotName"
           type="text"
@@ -17,8 +17,8 @@
           title="First name"
           required
           :disabled="state.isProcessing" />
-        <span v-if="state.hasMsg" class="input-warning">{{ state.msg }}</span>
-        <span v-else class="input-hint">The input should be case-sensitive</span>
+        <span v-if="state.msg.length != 0" class="input-warning">{{ state.msg }}</span>
+        <span v-else class="input-hint">Input is case-insensitive</span>
         <button type="submit" class="button is-primary">Submit</button>
         <button class="button is-danger" @click="clearForm">Go back</button>
       </form>
@@ -34,7 +34,7 @@
           placeholder="johndoe@example.com"
           required
           :disabled="state.isProcessing" />
-        <span v-if="state.hasMsg" class="input-warning">{{ state.msg }}</span>
+        <span v-if="state.msg.length != 0" class="input-warning">{{ state.msg }}</span>
         <span v-else class="input-hint">Hint! Use the e-mail address you have used when signing up for the event.</span>
         <button class="button is-primary" :disabled="state.isProcessing">Sign in</button>
       </form>
@@ -62,7 +62,6 @@ import { __getCurrentUser } from '../store';
 const state = reactive({
   email: null as string | null,
   isProcessing: false,
-  hasMsg: false,
   isEmailSent: false,
   gotName: '',
   msg: ''
@@ -95,7 +94,6 @@ async function login(e: Event) {
   if (!state.isEmailSent || !state.gotName || !state.email) return;
 
   state.isProcessing = true;
-  state.hasMsg = false;
 
   try {
     const qry = query(collection(db, 'participants'), where('email', '==', state.email));
@@ -103,8 +101,8 @@ async function login(e: Event) {
     const firstDoc = docs.docs[0];
 
     const name = firstDoc.get('name') as string;
-    if (!name.startsWith(state.gotName)) {
-      throw new Error('First name not matched with our records.');
+    if (!name.toLowerCase().startsWith(state.gotName)) {
+      throw new Error('Input not matched. Be sure ');
     }
 
     // separate view
@@ -127,7 +125,6 @@ async function verify(e: Event) {
   if (!state.email) return;
 
   state.isProcessing = true;
-  state.hasMsg = false;
 
   if (await participantExists()) {
     try {
@@ -143,7 +140,6 @@ async function verify(e: Event) {
     }
   } else {
     state.isProcessing = false;
-    state.hasMsg = true;
     state.msg = `E-mail ${state.email} was not found in our records! Please double check your e-mail.`;
   }
 }
