@@ -101,8 +101,8 @@ async function login(e: Event) {
     const firstDoc = docs.docs[0];
 
     const name = firstDoc.get('name') as string;
-    if (!name.toLowerCase().startsWith(state.gotName)) {
-      throw new Error('Input not matched. Be sure ');
+    if (!name.toLowerCase().startsWith(state.gotName.toLowerCase())) {
+      throw new Error('Input not matched. Be sure to double-check if the spelling is correct.');
     }
 
     // separate view
