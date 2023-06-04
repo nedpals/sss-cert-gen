@@ -12,7 +12,7 @@
       <div class="actions">
         <button v-show="imageHasLoaded" class="button is-secondary" @click="downloadCertImage">Download Image</button>
         <button v-show="imageHasLoaded" class="button is-secondary" @click="downloadCertPDF">Download PDF</button>
-        <router-link to="/" class="button is-primary">Go back</router-link>
+        <router-link v-if="!authState.participantInfo.fromVerify" to="/" class="button is-primary">Go back</router-link>
       </div>
     </transition>
   </section>
@@ -22,15 +22,24 @@
 import { onMounted, onUnmounted, ref } from 'vue';
 import certImageTemplateUrl from '../assets/cert.png';
 import { nameCase as namecase } from '@foundernest/namecase';
-import { authState, isPageLoading, setAsClaimed } from '../store';
+import { authState, isPageLoading, logout, setAsClaimed } from '../store';
 import { computed } from '@vue/reactivity';
 import { jsPDF } from 'jspdf';
+import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router';
 
+const route = useRoute();
+const router = useRouter();
 const img = ref(new Image());
 const imageHasLoaded = ref(false);
 const canvas = ref(document.createElement('canvas'));
 const certImageUrl = ref('');
 const certificateImgCss = computed(() => `background-image: url(${certImageUrl.value});`);
+
+if (route.name === 'cert-with-id-page' && !authState.participantInfo.fromVerify) {
+  // Go first to verify page to make sure the
+  // certificate data of participant data is loaded
+  router.replace({ name: 'verify-page', params: { id: route.params.id } });
+}
 
 function generateFileName(ext: string) {
   const prefix = 'LAWIG Certificate';
@@ -67,7 +76,7 @@ function onImgLoad() {
     // print identifier
     ctx.font = `400 50px "Google Sans"`;
     ctx.textAlign = 'left';
-    ctx.fillText(`LAWIG-${authState.participantInfo.docId.toUpperCase()}`, 200, 200)
+    ctx.fillText(`LAWIG-${authState.participantInfo.docId}`, 200, 200)
   }
 
   // generate download url
@@ -136,11 +145,22 @@ function fixName(name: string) {
   }
 }
 
+onBeforeRouteLeave(async (to) => {
+  if (authState.isAuthenticated && authState.participantInfo.fromVerify && to) {
+    // DO NOT ACCIDENTALLY "LEAK" DETAILS!
+    await logout();
+  }
+});
+
 onMounted(() => {
   img.value.src = certImageTemplateUrl;
   img.value.addEventListener('load', onImgLoad, false);
 
-  void setAsClaimed();
+  // Avoid setting hasClaimed if the user is
+  // viewing at /cert/<id> instead of just /cert
+  if (route.name !== 'cert-with-id-page') {
+    void setAsClaimed();
+  }
 });
 
 onUnmounted(() => {

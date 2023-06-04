@@ -8,11 +8,13 @@ export const isPageLoading = ref(false);
 export const authState = reactive({
   isAuthenticated: false,
   participantInfo: {
+    fromVerify: false,
     docId: null,
     email: null,
     name: null,
     hasClaimed: false
   } as {
+    fromVerify: boolean
     docId: string | null
     email: string | null
     name: string | null
@@ -33,6 +35,7 @@ export async function logout() {
 
   authState.isAuthenticated = false;
   authState.participantInfo = {
+    fromVerify: false,
     email: null,
     name: null,
     docId: null,
@@ -51,7 +54,7 @@ export async function setAsClaimed() {
   await updateDoc(docRef, { hasClaimed: true });
 }
 
-export async function __getCurrentUser(email: string) {
+export async function __getCurrentUser(email: string, fromVerify = false) {
   try {
     if (authState.isAuthenticated) {
       togglePageLoading(false);
@@ -65,6 +68,7 @@ export async function __getCurrentUser(email: string) {
 
       authState.isAuthenticated = true;
       authState.participantInfo = {
+        fromVerify,
         docId: doc.id ?? null,
         email: doc.get('email'),
         name: doc.get('name'),
@@ -72,6 +76,7 @@ export async function __getCurrentUser(email: string) {
       }
     }
   } catch (e) {
+    authState.participantInfo.fromVerify = false;
     authState.isAuthenticated = false;
   } finally {
     togglePageLoading(false);
