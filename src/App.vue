@@ -39,8 +39,8 @@ body, #app {
 }
 
 body {
-  color: #f8f8f2;
-  background: #fff;
+  color: var(--body-color);
+  background: var(--background-color);
 }
 
 #app {
@@ -52,7 +52,7 @@ body {
 
 .page-loading-bg {
   z-index: 999;
-  background: rgba(40, 42, 54, 0.5);
+  background: rgba(207, 207, 207, 0.5);
   display: flex;
   flex-direction: column;
   justify-content: center;
