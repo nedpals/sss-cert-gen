@@ -12,6 +12,12 @@
       <div class="actions">
         <button v-show="imageHasLoaded" class="button is-secondary" @click="downloadCertImage">Download Image</button>
         <button v-show="imageHasLoaded" class="button is-secondary" @click="downloadCertPDF">Download PDF</button>
+        <a :href="linkedInShareUrl" target="_blank" class="button is-linkedin">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M20.47 2H3.53a1.45 1.45 0 0 0-1.47 1.43v17.14A1.45 1.45 0 0 0 3.53 22h16.94a1.45 1.45 0 0 0 1.47-1.43V3.43A1.45 1.45 0 0 0 20.47 2ZM8.09 18.74h-3v-9h3ZM6.59 8.48a1.56 1.56 0 1 1 0-3.12a1.57 1.57 0 1 1 0 3.12Zm12.32 10.26h-3v-4.83c0-1.21-.43-2-1.52-2A1.65 1.65 0 0 0 12.85 13a2 2 0 0 0-.1.73v5h-3v-9h3V11a3 3 0 0 1 2.71-1.5c2 0 3.45 1.29 3.45 4.06Z"/>
+          </svg>
+          Add to LinkedIn
+        </a>
         <router-link v-if="!authState.participantInfo.fromVerify" to="/" class="button is-primary">Go back</router-link>
       </div>
     </transition>
@@ -34,6 +40,15 @@ const imageHasLoaded = ref(false);
 const canvas = ref(document.createElement('canvas'));
 const certImageUrl = ref('');
 const certificateImgCss = computed(() => `background-image: url(${certImageUrl.value});`);
+const certId = computed(() => `LAWIG-${authState.participantInfo.docId}`);
+const linkedInShareUrl = computed(() => {
+  const orgName = 'Google Developer Student Clubs Philippines';
+  const certTitle = 'LAWIG: A GDSC Philippines Info Session';
+  const certYear = 2023;
+  const certMonth = 6;
+  const certURL = window.location.origin + route.fullPath;
+  return `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&organizationName=${encodeURI(orgName)}&name=${certTitle}&issueYear=${certYear}&issueMonth=${certMonth}&certUrl=${certURL}&certId=${certId.value}`;
+});
 
 if (route.name === 'cert-with-id-page' && !authState.participantInfo.fromVerify) {
   // Go first to verify page to make sure the
@@ -76,7 +91,7 @@ function onImgLoad() {
     // print identifier
     ctx.font = `400 50px "Google Sans"`;
     ctx.textAlign = 'left';
-    ctx.fillText(`LAWIG-${authState.participantInfo.docId}`, 200, 200)
+    ctx.fillText(certId.value, 200, 200)
   }
 
   // generate download url
@@ -239,6 +254,32 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   margin: 0.25rem;
+}
+
+.button.is-linkedin {
+  --linkedin-color: #0a66c2;
+  --linkedin-color-hover: #0858a7;
+
+  padding: 0.4rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background-color: var(--linkedin-color);
+  background-image: linear-gradient(var(--linkedin-color), var(--linkedin-color-hover));
+  color: #fff;
+  border: 1px solid var(--linkedin-color-hover);
+}
+
+.button.is-linkedin:hover,
+.button.is-linkedin:focus {
+  background: var(--linkedin-color-hover);
+}
+
+.button.is-linkedin svg {
+  width: 1.5rem;
+  margin-top: -0.1rem;
+  margin-right: 0.4rem;
 }
 
 @media screen and (min-width: 1024px) {
