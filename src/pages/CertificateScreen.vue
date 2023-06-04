@@ -46,7 +46,7 @@ const linkedInShareUrl = computed(() => {
   const certTitle = 'LAWIG: A GDSC Philippines Info Session';
   const certYear = 2023;
   const certMonth = 6;
-  const certURL = window.location.origin + route.fullPath;
+  const certURL = window.location.origin + `/cert/${certId.value}`;
   return `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&organizationName=${encodeURI(orgName)}&name=${certTitle}&issueYear=${certYear}&issueMonth=${certMonth}&certUrl=${certURL}&certId=${certId.value}`;
 });
 
