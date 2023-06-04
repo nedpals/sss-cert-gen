@@ -32,6 +32,16 @@ const canvas = ref(document.createElement('canvas'));
 const certImageUrl = ref('');
 const certificateImgCss = computed(() => `background-image: url(${certImageUrl.value});`);
 
+function generateFileName(ext: string) {
+  const prefix = 'LAWIG Certificate';
+  const extWithDot = '.' + ext;
+  if (!authState.participantInfo.name) {
+    return prefix + extWithDot;
+  }
+  const name = authState.participantInfo.name!;
+  return `${prefix} - ${name}${extWithDot}`;
+}
+
 function onImgLoad() {
   const ctx = canvas.value.getContext('2d');
   if (!ctx) return;
@@ -70,15 +80,14 @@ function onImgLoad() {
 
 function downloadCertImage() {
   const link = document.createElement('a');
-  link.download = `LAWIG Certificate - ${name}.png`;
+  link.download = generateFileName('png');
   link.href = certImageUrl.value;
   link.click();
 }
 
 function downloadCertPDF() {
   const doc = new jsPDF('l', 'mm', 'a4');
-  const name = authState.participantInfo.name!;
-  const filename = `LAWIG Certificate - ${name}.pdf`;
+  const filename = generateFileName('pdf');
   const width = doc.internal.pageSize.getWidth();
   const height = doc.internal.pageSize.getHeight();
 
