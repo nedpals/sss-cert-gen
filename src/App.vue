@@ -13,19 +13,10 @@
 </template>
 
 <script lang="ts" setup>
-import { RouterView, useRoute } from 'vue-router';
+import { RouterView } from 'vue-router';
 import Background from './components/Background.vue';
 import LoadingSpinner from './components/LoadingSpinner.vue';
-import { onBeforeMount } from 'vue';
-import { __getCurrentUser, isPageLoading } from './store';
-
-const route = useRoute();
-
-onBeforeMount(() => {
-  if (route.path != '/confirm') {
-    void __getCurrentUser();
-  }
-});
+import { isPageLoading } from './store';
 </script>
 
 <style>
