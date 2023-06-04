@@ -1,10 +1,10 @@
 <template>
-  <div class="container">
-    <img src="../assets/logo.png" class="logo">
+  <main-layout>
     <section class="card">
       <div v-show="state.isProcessing" class="card-loading-spinner">
         <LoadingSpinner />
       </div>
+
       <h2>Claim your certificate</h2>
 
       <form v-if="state.isEmailSent" class="section" @submit="($e) => void login($e)">
@@ -46,18 +46,18 @@
         <button class="button is-danger" @click="logout" :disabled="state.isProcessing">Sign out</button>
       </section>
     </section>
-
-    <img src="../assets/presentor_logos.png" class="presenter-logos" alt="Davao JS, DSC UIC, UIC SITES">
-  </div>
+  </main-layout>
 </template>
 
 <script lang="ts" setup>
 import { db } from '../firebase';
-import LoadingSpinner from '../components/LoadingSpinner.vue';
 import { collection, getDocs, query, where } from '@firebase/firestore';
 import { authState, logout } from '../store';
 import { reactive } from 'vue';
 import { __getCurrentUser } from '../store';
+
+import LoadingSpinner from '../components/LoadingSpinner.vue';
+import MainLayout from '../components/MainLayout.vue';
 
 const state = reactive({
   email: null as string | null,
@@ -146,19 +146,6 @@ async function verify(e: Event) {
 </script>
 
 <style scoped>
-.container {
-  height: 83vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 3.5rem 0;
-}
-
-.logo {
-  width: 10rem;
-  margin-bottom: 3rem;
-}
-
 .card {
   position: relative;
   background: #fff;
@@ -237,47 +224,21 @@ input {
 .input-hint {
   color: rgb(117, 117, 117);
 }
-
-.presenter-logos {
-  width: 75%;
-  margin-top: auto;
-}
-
 @media screen and (min-width: 640px) {
-  .logo {
-    width: 25rem;
-  }
-
   .card {
     width: 20rem;
-  }
-
-  .presenter-logos {
-    width: 50%;
   }
 }
 
 @media screen and (min-width: 1024px) {
-  .logo {
-    width: 20rem;
-  }
-
   .card {
     width: 30%;
-  }
-
-  .presenter-logos {
-    width: 35%;
   }
 }
 
 @media screen and (min-width: 1280px) {
   .card {
     width: 23rem;
-  }
-
-  .presenter-logos {
-    width: 25%;
   }
 }
 </style>
