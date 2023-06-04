@@ -39,6 +39,10 @@ const routes: RouteRecordRaw[] = [
       pageTitle: 'Certificate Screen'
     }
   },
+  {
+    path: '*',
+    redirect: '/'
+  }
 ];
 
 export const router = createRouter({
