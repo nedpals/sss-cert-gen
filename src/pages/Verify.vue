@@ -13,7 +13,7 @@ import { collection, documentId, getDocs, limit, query, where } from '@firebase/
 import { db } from '../firebase';
 import { __getCurrentUser } from '../store';
 
-const ID_REGEX = /^LAWIG-(\S+)$/;
+const ID_REGEX = /^DSSS2023-(\S+)$/;
 const router = useRouter();
 const route = useRoute();
 const message = ref('');

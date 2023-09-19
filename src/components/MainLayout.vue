@@ -2,7 +2,7 @@
     <div class="container">
         <img src="../assets/logo.png" class="logo">
         <slot></slot>
-        <img src="../assets/presentor_logos.png" class="presenter-logos" alt="GDSC Philippines">
+        <img src="../assets/presentor_logos.png" class="presenter-logos" alt="Davao Interschool Computer Enthusiasts">
     </div>
 </template>
 
@@ -16,7 +16,7 @@
 }
 
 .logo {
-  width: 10rem;
+  width: 25rem;
   margin-bottom: 3rem;
 }
 

@@ -40,12 +40,12 @@ const imageHasLoaded = ref(false);
 const canvas = ref(document.createElement('canvas'));
 const certImageUrl = ref('');
 const certificateImgCss = computed(() => `background-image: url(${certImageUrl.value});`);
-const certId = computed(() => `LAWIG-${authState.participantInfo.docId}`);
+const certId = computed(() => `DSSS2023-${authState.participantInfo.docId}`);
 const linkedInShareUrl = computed(() => {
-  const orgName = 'Google Developer Student Clubs Philippines';
-  const certTitle = 'LAWIG: A GDSC Philippines Info Session';
+  const orgName = 'DICE - Davao Interschool Computer Enthusiasts';
+  const certTitle = '1st Davao Student Startup Summit 2023: Sparking Insights and Ideas for Your Next Innovation';
   const certYear = 2023;
-  const certMonth = 6;
+  const certMonth = 9;
   const certURL = window.location.origin + `/verify/${certId.value}`;
   return `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&organizationName=${encodeURI(orgName)}&name=${certTitle}&issueYear=${certYear}&issueMonth=${certMonth}&certUrl=${certURL}&certId=${certId.value}`;
 });
@@ -57,7 +57,7 @@ if (route.name === 'cert-with-id-page' && !authState.participantInfo.fromVerify)
 }
 
 function generateFileName(ext: string) {
-  const prefix = 'LAWIG Certificate';
+  const prefix = 'DSSS2023 Certificate';
   const extWithDot = '.' + ext;
   if (!authState.participantInfo.name) {
     return prefix + extWithDot;
@@ -78,20 +78,21 @@ function onImgLoad() {
 
   // for recalculating the font size.
   const textDiff = text.length > 21 ? text.length - 21 + 5 : 0;
-  const fontSize = 250 - textDiff;
+  const fontSize = 80 - textDiff;
 
-  ctx.font = `700 ${fontSize}px "Google Sans"`;
-  ctx.fillStyle = '#374050';
+  ctx.font = `700 ${fontSize}px "Montserrat"`;
+  ctx.fillStyle = '#fff';
   ctx.textAlign = 'center';
 
   // print name
-  ctx.fillText(fixName(text), (canvas.value.width / 2), (canvas.value.height / 1.9) - 50);
+  ctx.fillText(fixName(text), (canvas.value.width / 2), (canvas.value.height * 0.49) - 50);
 
   if (authState.participantInfo.docId) {
+    ctx.fillStyle = '#333333';
     // print identifier
-    ctx.font = `400 50px "Google Sans"`;
+    ctx.font = `400 20px "Montserrat"`;
     ctx.textAlign = 'left';
-    ctx.fillText(certId.value, 200, 200)
+    ctx.fillText(certId.value, 50, 950)
   }
 
   // generate download url
@@ -185,11 +186,10 @@ onUnmounted(() => {
 
 <style scoped>
 .heading {
-  font-family: "Google Sans", Arial, Helvetica, sans-serif;
-  font-weight: 400;
+  font-weight: 700;
   margin-bottom: 2.5rem;
   text-align: center;
-  color: #374050;
+  color: #fff;
   font-size: 2.5rem;
 }
 

@@ -20,7 +20,7 @@ import { isPageLoading } from './store';
 </script>
 
 <style>
-@import url('https://cdn.jsdelivr.net/gh/mortezaom/google-sans-cdn@master/fonts.css');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
 @import "normalize.css";
 
 html,
@@ -30,12 +30,12 @@ body, #app {
 }
 
 body {
+  font-family: "Montserrat", Helvetica, Arial, sans-serif;
   color: var(--body-color);
   background: var(--background-color);
 }
 
 #app {
-  font-family: "Google Sans", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   position: relative;
