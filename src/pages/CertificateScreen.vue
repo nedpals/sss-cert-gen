@@ -42,7 +42,7 @@ const certImageUrl = ref('');
 const certificateImgCss = computed(() => `background-image: url(${certImageUrl.value});`);
 const certId = computed(() => `DSSS2023-${authState.participantInfo.docId}`);
 const linkedInShareUrl = computed(() => {
-  const orgName = 'DICE - Davao Interschool Computer Enthusiasts';
+  const orgName = '96606526';
   const certTitle = '1st Davao Student Startup Summit 2023: Sparking Insights and Ideas for Your Next Innovation';
   const certYear = 2023;
   const certMonth = 9;

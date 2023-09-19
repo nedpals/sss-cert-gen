@@ -4,7 +4,7 @@
     "indexes": "firestore.indexes.json"
   },
   "hosting": {
-    "site": "js-weekends-cert",
+    "site": "sss-cert",
     "public": "dist",
     "ignore": [
       "firebase.json",
